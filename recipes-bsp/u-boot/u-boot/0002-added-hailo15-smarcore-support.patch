@@ -1,0 +1,272 @@
+From 1bed4d55f400aee907981f8b3e428e81111ca5a6 Mon Sep 17 00:00:00 2001
+From: Matteo Lisi <matteo.lisi@engicam.com>
+Date: Wed, 16 Oct 2024 14:07:36 +0200
+Subject: [PATCH] added hailo15-smarcore support
+
+---
+ arch/arm/dts/Makefile                 |  1 +
+ arch/arm/dts/hailo15-smarcore.dts     | 80 +++++++++++++++++++++++++++
+ arch/arm/mach-hailo/Kconfig           |  5 ++
+ board/hailo/hailo15-smarcore/Kconfig  | 16 ++++++
+ board/hailo/hailo15-smarcore/Makefile |  3 +
+ configs/hailo15_smarcore_defconfig    | 12 ++++
+ include/configs/hailo15-sbc.h         |  5 +-
+ include/configs/hailo15-smarcore.h    | 49 ++++++++++++++++
+ 8 files changed, 168 insertions(+), 3 deletions(-)
+ create mode 100644 arch/arm/dts/hailo15-smarcore.dts
+ create mode 100644 board/hailo/hailo15-smarcore/Kconfig
+ create mode 100644 board/hailo/hailo15-smarcore/Makefile
+ create mode 100644 configs/hailo15_smarcore_defconfig
+ create mode 100644 include/configs/hailo15-smarcore.h
+
+diff --git a/arch/arm/dts/Makefile b/arch/arm/dts/Makefile
+index 8b8400d43c..69e0da659c 100644
+--- a/arch/arm/dts/Makefile
++++ b/arch/arm/dts/Makefile
+@@ -1173,6 +1173,7 @@ dtb-$(CONFIG_TARGET_HAILO15_EVB_2_CAMERA_VPU) += hailo15-evb-2-camera-vpu.dtb
+ dtb-$(CONFIG_TARGET_HAILO15_EVB_SECURITY_CAMERA) += hailo15-evb-security-camera.dtb
+ dtb-$(CONFIG_TARGET_HAILO15_EVB_SECURITY_CAMERA) += hailo15-evb-security-camera-sdio1-8bit.dtb
+ dtb-$(CONFIG_TARGET_HAILO15_SBC) += hailo15-sbc.dtb
++dtb-$(CONFIG_TARGET_HAILO15_SMARCORE) += hailo15-smarcore.dtb
+ dtb-$(CONFIG_TARGET_HAILO15L_OREGANO) += hailo15l-oregano.dtb
+ dtb-$(CONFIG_TARGET_HAILO15L_EVB) += hailo15l-evb.dtb
+ dtb-$(CONFIG_TARGET_HAILO15L_SBC) += hailo15l-sbc.dtb
+diff --git a/arch/arm/dts/hailo15-smarcore.dts b/arch/arm/dts/hailo15-smarcore.dts
+new file mode 100644
+index 0000000000..8cdd6973d3
+--- /dev/null
++++ b/arch/arm/dts/hailo15-smarcore.dts
+@@ -0,0 +1,80 @@
++// SPDX-License-Identifier: GPL-2.0
++/*
++ * dts file for Hailo15 SoC
++ *
++ * Copyright (c) 2019-2024 Hailo Technologies Ltd. All rights reserved.
++ */
++
++#include "hailo15-base.dtsi"
++#include "hailo15_ddr_configuration.dtsi"
++//#include "hailo15_ddr_MT53E512M32D1-046_regconfig_2GB.dtsi"
++//#include "hailo15_ddr_MT53E2G32D4DE-046_regconfig_8GB.dtsi"
++#include "hailo15_ddr_MT53E1G32D2FW-046_regconfig_ca_odtb_pu_4GB.dtsi"
++
++&sdio0 {
++	status = "okay";
++	sdhci-caps = <0 0x01000000>; // Force VOLT33 capability
++	bus-width = <4>;
++	phy-config {
++			max-frequency = <25000000>;
++			card-is-emmc = <0x0>;
++			cmd-pad-values = <0x1 0x3 0x1 0x1>; // txslew_ctrl_n, txslew_ctrl_p, weakpull_enable, rxsel
++			dat-pad-values = <0x1 0x3 0x1 0x1>; // txslew_ctrl_n, txslew_ctrl_p, weakpull_enable, rxsel
++			rst-pad-values = <0x1 0x3 0x1 0x1>; // txslew_ctrl_n, txslew_ctrl_p, weakpull_enable, rxsel
++			clk-pad-values = <0x1 0x3 0x0 0x1>; // txslew_ctrl_n, txslew_ctrl_p, weakpull_enable, rxsel
++			sdclkdl-cnfg = <0x1 0xAF>; //extdly_en, cckdl_dc
++			drive-strength = <0x9 0x8>; //pad_sp, pad_sn
++			u-boot,dm-spl;
++	};
++};
++&sdio1 {
++	non-removable;
++	status = "okay";
++	phy-config {
++			card-is-emmc = <0x1>;
++			cmd-pad-values = <0x2 0x2 0x1 0x1>; // txslew_ctrl_n, txslew_ctrl_p, weakpull_enable, rxsel
++			dat-pad-values = <0x2 0x2 0x1 0x1>; // txslew_ctrl_n, txslew_ctrl_p, weakpull_enable, rxsel
++			rst-pad-values = <0x2 0x2 0x1 0x1>; // txslew_ctrl_n, txslew_ctrl_p, weakpull_enable, rxsel
++			clk-pad-values = <0x2 0x2 0x0 0x0>; // txslew_ctrl_n, txslew_ctrl_p, weakpull_enable, rxsel
++			sdclkdl-cnfg = <0x1 0x59>; //extdly_en, cckdl_dc
++			drive-strength = <0x9 0x8>; //pad_sp, pad_sn
++			u-boot,dm-spl;
++    };
++};
++
++
++&macb {
++    status = "okay";
++    pinctrl-names = "default";
++    pinctrl-0 = <&pinctrl_eth>;
++	phy-mode = "rgmii-id";
++    phy-handle = <&phy0>;
++
++    phy0: ethernet-phy@0 {
++        reg = <0>;
++        mxl-8611x,rx-internal-delay-ps = <1650>;
++        mxl-8611x,tx-internal-delay-ps-100m = <2250>;
++        mxl-8611x,tx-internal-delay-ps-1g = <1200>;
++    };
++};
++
++&pinctrl {
++    pinctrl_eth: eth {
++        pins = "eth_rgmii_tx_clk",
++               "eth_rgmii_tx_ctl",
++               "eth_rgmii_txd_0",
++               "eth_rgmii_txd_1",
++               "eth_rgmii_txd_2",
++               "eth_rgmii_txd_3";
++        drive-strength = <2>;
++    };
++};
++
++
++&i2c_0 {
++    status = "okay";
++};
++
++&i2c_1 {
++    status = "okay";
++};
+diff --git a/arch/arm/mach-hailo/Kconfig b/arch/arm/mach-hailo/Kconfig
+index 0cb98f1c1f..dd17d84727 100644
+--- a/arch/arm/mach-hailo/Kconfig
++++ b/arch/arm/mach-hailo/Kconfig
+@@ -320,6 +320,10 @@ config TARGET_HAILO15_SBC
+ 	bool "Hailo15 SBC"
+ 	select MACH_HAILO15
+ 
++config TARGET_HAILO15_SMARCORE
++	bool "Hailo15 SMARCORE"
++	select MACH_HAILO15
++
+ config TARGET_HAILO15L_OREGANO
+ 	bool "Hailo15L Oregano"
+ 	select MACH_HAILO15L
+@@ -349,6 +353,7 @@ source "board/hailo/hailo15l-veloce/Kconfig"
+ source "board/hailo/hailo15-evb-2-camera-vpu/Kconfig"
+ source "board/hailo/hailo15-evb-security-camera/Kconfig"
+ source "board/hailo/hailo15-sbc/Kconfig"
++source "board/hailo/hailo15-smarcore/Kconfig"
+ source "board/hailo/hailo15l-oregano/Kconfig"
+ source "board/hailo/hailo15l-evb/Kconfig"
+ source "board/hailo/hailo15l-sbc/Kconfig"
+diff --git a/board/hailo/hailo15-smarcore/Kconfig b/board/hailo/hailo15-smarcore/Kconfig
+new file mode 100644
+index 0000000000..f400278a35
+--- /dev/null
++++ b/board/hailo/hailo15-smarcore/Kconfig
+@@ -0,0 +1,16 @@
++if TARGET_HAILO15_SMARCORE
++
++config SYS_BOARD
++	default "hailo15-smarcore"
++
++config SYS_VENDOR
++	default "hailo"
++
++config SYS_CONFIG_NAME
++	default "hailo15-smarcore"
++	help
++	  This option contains information about board configuration name.
++	  Based on this option include/configs/<CONFIG_SYS_CONFIG_NAME>.h header
++	  will be used for board configuration.
++
++endif
+diff --git a/board/hailo/hailo15-smarcore/Makefile b/board/hailo/hailo15-smarcore/Makefile
+new file mode 100644
+index 0000000000..4cf1706f85
+--- /dev/null
++++ b/board/hailo/hailo15-smarcore/Makefile
+@@ -0,0 +1,3 @@
++# SPDX-License-Identifier: GPL-2.0
++
++obj- += dummy.o
+\ No newline at end of file
+diff --git a/configs/hailo15_smarcore_defconfig b/configs/hailo15_smarcore_defconfig
+new file mode 100644
+index 0000000000..d34a733e70
+--- /dev/null
++++ b/configs/hailo15_smarcore_defconfig
+@@ -0,0 +1,12 @@
++CONFIG_ARM=y
++CONFIG_ARCH_HAILO=y
++CONFIG_TARGET_HAILO15_SMARCORE=y
++CONFIG_DEFAULT_DEVICE_TREE="hailo15-smarcore"
++CONFIG_SPI_FLASH_ISSI=y
++CONFIG_SPI_FLASH_WINBOND=y
++CONFIG_SPI_FLASH_MACRONIX=y
++CONFIG_DM_ETH_PHY=y
++CONFIG_DM_MDIO=y
++CONFIG_CMD_FS_GENERIC=y
++CONFIG_PHY_MXL8611X=y
++
+diff --git a/include/configs/hailo15-sbc.h b/include/configs/hailo15-sbc.h
+index 7278ed38d5..977c0a3bb9 100644
+--- a/include/configs/hailo15-sbc.h
++++ b/include/configs/hailo15-sbc.h
+@@ -15,12 +15,11 @@
+     "bootmenu_0=Autodetect=" \
+         "if test \"${auto_uboot_update_enable}\" = \"yes\"; then run auto_uboot_update; exit 1; fi; " \
+         "echo Trying Boot from SD; run boot_mmc1;" \
+-        "echo Trying Boot from NFS; run bootnfs;" \
++        "echo Trying Boot from eMMC; run boot_mmc1;" \
+         "echo ERROR: All boot options failed\0" \
+     "bootmenu_1=Boot from SD Card=run boot_mmc1\0" \
+     "bootmenu_2=Update SD (wic) from TFTP=run update_wic_mmc1 && bootmenu -1\0" \
+     "bootmenu_3=Update SD (partitions) from TFTP=run update_partitions_mmc1 && bootmenu -1\0" \
+-    "bootmenu_4=Boot from NFS=run bootnfs\0" \
+     "default_spl_boot_source=mmc2\0" \
+     "spl_boot_source=mmc2\0"
+ 
+@@ -46,4 +45,4 @@
+  *           - 0x170000000 - 0x17fffffff: Bank #1 ECC (0.25G = 0x10000000)
+  */
+ 
+-#endif /* __HAILO15_SBC_H */
+\ No newline at end of file
++#endif /* __HAILO15_SBC_H */
+diff --git a/include/configs/hailo15-smarcore.h b/include/configs/hailo15-smarcore.h
+new file mode 100644
+index 0000000000..22b6a39c70
+--- /dev/null
++++ b/include/configs/hailo15-smarcore.h
+@@ -0,0 +1,49 @@
++/* SPDX-License-Identifier: GPL-2.0 */
++/*
++ * Copyright (c) 2019-2023 Hailo Technologies Ltd. All rights reserved.  
++ *
++ * Configuration for Hailo15.
++ */
++
++#ifndef __HAILO15_SBC_H
++#define __HAILO15_SBC_H
++
++#define SWUPDATE_MMC_INDEX "0"
++
++#define BOOTMENU \
++    /* Try all boot options by order */ \
++    "bootmenu_0=Autodetect=" \
++        "if test \"${auto_uboot_update_enable}\" = \"yes\"; then run auto_uboot_update; exit 1; fi; " \
++        "echo Trying Boot from SD; run boot_mmc0;" \
++        "echo Trying Boot from NFS; run bootnfs;" \
++        "echo ERROR: All boot options failed\0" \
++    "bootmenu_1=Boot from SD Card=run boot_mmc0\0" \
++    "bootmenu_2=Update SD (wic) from TFTP=run update_wic_mmc0 && bootmenu -1\0" \
++    "bootmenu_3=Update SD (partitions) from TFTP=run update_partitions_mmc0 && bootmenu -1\0" \
++    "bootmenu_4=Boot from NFS=run bootnfs\0" \
++    "default_spl_boot_source=mmc01\0" \
++    "spl_boot_source=mmc01\0"
++
++#ifdef CONFIG_HAILO15_SWUPDATE
++#define SWUPDATE_BOOTMENU_OPTION "bootmenu_5=SWUpdate=run boot_swupdate_mmc\0" \
++                                 "bootmenu_6=SWUpdate AB board init=run boot_swupdate_ab_tftp\0"
++#endif /* CONFIG_HAILO15_SWUPDATE */
++
++#include "hailo15_common.h"
++
++/*! @note: lpddr4 inline ecc located at the top 1/8 of the referred CS.
++ *         In regards of using LPDDR4 setup of:
++ *           - 2 ranks (Also refered as CS)
++ *           - 2 channels per rank
++ *           - Each channel is 16 bits wide => each rank is 32 bits bide
++ *           - Rank size: 2G bytes
++ *         If __not__ using ECC, then memory access are located in a single region:
++ *           - 0x80000000 -  0x17fffffff: Bank #0 (4G = 0x100000000)
++ *         If using ECC, then memory region is spilted to 2 ranges:
++ *           - 0x080000000 - 0x0efffffff: Bank #0     (1.75G = 0x70000000)
++ *           - 0x0f0000000 - 0x0ffffffff: Bank #0 ECC (0.25G = 0x10000000)
++ *           - 0x100000000 - 0x16fffffff: Bank #1     (1.75G = 0x70000000)
++ *           - 0x170000000 - 0x17fffffff: Bank #1 ECC (0.25G = 0x10000000)
++ */
++
++#endif /* __HAILO15_SBC_H */
