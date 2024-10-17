@@ -1,4 +1,7 @@
-# Smarcore 4K with hailo15-smarcore
+# Smarcore 4K With Hailo15-Smarcore
+
+
+![Smarcore 4K](Multimedia4K.png)
 
 
 |  Device            | Status | NOTE                    |
@@ -17,7 +20,7 @@
 
 ## RTC
 
-````
+```bash
 root@hailo15:~# dmesg  | grep -i rtc
 [    1.401355] rtc-pcf8523 1-0068: registered as rtc0
 [    1.407471] rtc-pcf8523 1-0068: setting system clock to 2018-03-09T12:35:46 UTC (1520598946)
@@ -25,61 +28,56 @@ root@hailo15:~# dmesg  | grep -i rtc
 root@hailo15:~# hwclock
 2018-03-09 12:37:40.821722+00:00
 root@hailo15:~# hwclock --systohc
-````
-
+```
 
 ## HUB USB
 
 Hub USB reset GPIO:
 
-````
+```bash
 gpioset gpiochip1 7=0
-````
+```
 
 ## Camera input
 
-Tested with Hailo detect.sh demo application:
+Tested with Hailo **detect.sh** demo application:
 
-### hailo15 side command
-
-````
+```bash
 cd /home/root/apps/detection
 ./detection.sh
-````
+```
 
 ### Host PC command
 
-````
-gst-launch-1.0 -v udpsrc port=5000 address=0.0.0.0 ! application/x-rtp,encoding-name=H264 ! queue ! rtph264depay ! queue ! h264parse ! avdec_h264 ! queue ! videoconvert ! fpsdisplaysink video-sink=autovideosink text-overlay=false sync=false
-````
+```bash
+gst-launch-1.0 -v udpsrc port=5000 address=0.0.0.0 ! \
+application/x-rtp,encoding-name=H264 ! queue ! \
+rtph264depay ! queue ! h264parse ! avdec_h264 ! \
+queue ! videoconvert ! \
+fpsdisplaysink video-sink=autovideosink text-overlay=false sync=false
+```
 
-Note:
+>**Note**:you should be need to modify **detectio.sh** edit the following line with you host **PC IP address**:
 
-you should be need to modify detectio.sh updating the line:
-
-````
+```bash
     readonly DEFAULT_UDP_HOST_IP="10.0.0.2"
-````
-
-with your PC ip address.
-
+```
 
 ## Ethernet
 
-on u-boot
+In U-Boot CLI:
 
-````
+```bash
 hailo15# gpio clean 19
 hailo15# setenv ipaddr 10.24.0.52
 hailo15# ping 10.24.0.1
-````
+```
 
 # GPIO assigment
 
+Below the available GPIOs:
 
-elow the gpio available:
-
-|GPIO     | FUNCTION           |
+|**GPIO** | **FUNCTION**       |
 |:-------:|:------------------:|
 |GPIO_0   | GPIO_0             |
 |GPIO_1   | GPIO_1             |
@@ -117,11 +115,11 @@ elow the gpio available:
 
 ## GPIO example
 
-Frou muser space you must use the GPIOLib tooù
+You must use the **GPIOLib Tool** from userspace in order to change the GPIOs state:
 
 example:
 
-````
+````bash
 # gpioinfo
 8<-- snip -->8
 

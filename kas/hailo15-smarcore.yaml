@@ -1,0 +1,17 @@
+header:
+  version: 11
+  includes:
+  - hailo15-dev.yml
+  - hailo15-sbc-machine.yml
+
+target:
+  - core-image-minimal
+
+machine: hailo15-smarcore
+distro: poky
+build_system: openembedded
+
+repos:
+  meta-engicam-hailo:
+    layers:
+        meta-engicam-hailo:
