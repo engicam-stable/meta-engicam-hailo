@@ -24,16 +24,6 @@ cp meta-engicam-hailo/kas/hailo15-smarcore.yaml kas/
 kas build kas/hailo15-smarcore.yaml
 ```
 
->**Warning:**
-Some poky recipes are not updated to the last branch. If fetch error occurs please use the command below:
-
-```bash
-sed -i 's/master/main/g' poky/meta/recipes-extended/cracklib/cracklib_2.9.7.bb
-sed -i 's/master/main/g' poky/meta/recipes-graphics/spir/spirv-headers_1.3.204.1.bb
-sed -i 's/master/main/g' meta-openembedded/meta-oe/recipes-support/libiio/libiio_git.bb
-sed -i 's/master/main/g' poky/meta/recipes-graphics/glslang/glslang_1.3.204.1.bb 
-```
-
 Once you finished the first build you can use the Yocto framework as usual:
 
 Es.
