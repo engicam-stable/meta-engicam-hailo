@@ -14,12 +14,12 @@ Serial connection on **J29** and dip switch 2 ON
 
 Download the sw package from this [link](https://hailo.ai/developer-zone/software-downloads/):
 
-**hailo_vision_processor_sw_package_2024-10.tar.gz**
+**hailo_vision_processor_sw_package_2025-01.tar.gz**
 
 Unpack it, launch the virtual python enviroment setup in the folder and install it with **pip**:
 
 ```bash
-cd hailo_vision_processor_sw_package_2024-10/tools
+cd hailo_vision_processor_sw_package_2025-01/tools
 python3 -m venv .
 source ./bin/activate
 pip install hailo15_board_tools-1.5.0-py3-none-any.whl

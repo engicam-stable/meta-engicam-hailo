@@ -1,6 +1,6 @@
 # Meta-Engicam-Hailo
 
-Ver. 1.5
+Ver. 1.6
 
 This README file contains information about the **meta-engicam-hailo** Yocto layer.
 
@@ -17,7 +17,7 @@ See the [Test Board Documentation](docs/tests.md) for more information
 Fetch the BSP sources:
 
 ```bash
-git clone https://github.com/hailo-ai/meta-hailo-soc.git -b 1.5.0
+git clone https://github.com/hailo-ai/meta-hailo-soc.git -b 1.6.0
 cd meta-hailo-soc
 git clone https://git.engicam.com/internal/meta-engicam-hailo.git
 cp meta-engicam-hailo/kas/hailo15-smarcore.yaml kas/
@@ -42,7 +42,7 @@ Es.
 source poky/oe-init-build-env
 
 devtool modify linux-yocto-hailo
-devtool u.boot
+devtool u-boot
 bitbake core-image-minimal
 ```
 
